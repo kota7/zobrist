@@ -19,7 +19,8 @@ zobristht <- function(keysize, hashsize,
 
   ## initialize hash table ##
   ## hash table is a list of the size 2^hashsize
-  hashtable <- rep(list(), 2^hashsize)
+  ## a table entry is a named list corresponding to a key
+  hashtable <- lapply(1:(2^hashsize), function(a) list())
 
   ## initializes quick memory map ##
   ## this is a named integer vector of short size, where
@@ -32,17 +33,17 @@ zobristht <- function(keysize, hashsize,
   ## generate random integers for each key positions
   ## i-th number represents the hash value for a key such that
   ## all but the i-th position is 1
-  randomint <- sample.int(2^hashsize, keysize)
+  randomint <- sample.int(2^hashsize - 1, keysize)
 
 
   ## define hash function
-  hashfunc <- function(key, offsets = integer(0))
+  hashfunc <- function(key, incr = integer(0))
   {
     # key     : an integer vector representing the positive key entries
-    # offsets : an integer vector representing additional entries
+    # incr : an integer vector representing additional entries
 
     bitstr1 <- intvec_to_bitstring(key, keysize)
-    bitstr2 <- intvec_to_bitstring(c(key, offsets), keysize)
+    bitstr2 <- intvec_to_bitstring(c(key, incr), keysize)
     #cat("bitstr1 = ", bitstr1, "\n")
     #cat("bitstr2 = ", bitstr2, "\n")
 
@@ -69,14 +70,14 @@ zobristht <- function(keysize, hashsize,
       value <- quickmap[index]
       quickmap <<- c(quickmap[-index], quickmap[index])
       ## value for bitstr2
-      value <- Reduce(bitwXor, randomint[offsets], value)
+      value <- Reduce(bitwXor, randomint[incr], value)
       # add the new value to the quick map
       quickmap <<- c(quickmap[-1], setNames(value, bitstr2))
       return(unname(value))
     }
 
     ## third, we will compute the hash value from scratch
-    value <- Reduce(bitwXor, randomint[c(key, offsets)], 0L)
+    value <- Reduce(bitwXor, randomint[c(key, incr)], 0L)
     quickmap <<- c(quickmap[-1], setNames(value, bitstr2))
     return(unname(value))
   }
@@ -86,9 +87,71 @@ zobristht <- function(keysize, hashsize,
   ## - delete(key)
   ## - find(key)
   ## - get(key)
-  insert <- function(key, value)
+  update <- function(key, value, incr = integer(0))
   {
+    ## get the hash value
+    hv <- hashfunc(key, incr)
+    i <- hv + 1  # one-based index
+    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
 
+    ## do we have this key already?
+    flg <- bitstr == names(hashtable[[i]])
+    if (any(flg)) {
+      ## there is one already -> update the value
+      j <- head(which(flg), 1)
+      hashtable[[i]][[j]] <<- value
+    } else {
+      ## this is a new key -> append to the list
+      hashtable[[i]] <<- c(hashtable[[i]],
+                           setNames(list(value), bitstr))
+    }
+  }
+
+  delete <- function(key, incr = integer(0))
+  {
+    ## get the hash value
+    hv <- hashfunc(key, incr)
+    i <- hv + 1  # one-based index
+    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
+
+    ## do we have this key already?
+    flg <- bitstr == names(hashtable[[i]])
+    if (any(flg)) {
+      ## there is one already -> update the value
+      j <- head(which(flg), 1)
+      hashtable[[i]][[j]] <<- NULL
+    }
+  }
+
+  find <- function(key, incr = integer(0))
+  {
+    ## get the hash value
+    hv <- hashfunc(key, incr)
+    i <- hv + 1  # one-based index
+    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
+
+    ## do we have this key already?
+    flg <- bitstr == names(hashtable[[i]])
+    any(flg)
+  }
+
+  get <- function(key, incr = integer(0))
+  {
+    ## get the hash value
+    hv <- hashfunc(key, incr)
+    i <- hv + 1  # one-based index
+    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
+
+    ## do we have this key already?
+    flg <- bitstr == names(hashtable[[i]])
+    if (any(flg)) {
+      ## there is one already -> return the value
+      j <- head(which(flg), 1)
+      return(hashtable[[i]][[j]])
+    } else {
+      ## this is a new key -> return NULL
+      return(NULL)
+    }
   }
 
   self <- environment()
