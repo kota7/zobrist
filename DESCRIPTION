@@ -1,0 +1,17 @@
+Package: zobrist
+Type: Package
+Title: Zobrist Hash Table
+Version: 0.1.0
+Authors@R: c(
+  person("Kota", "Mori", email = "kmori05@gmail.com", role = c("aut", "cre"))
+  )
+Maintainer: Kota Mori <kmori05@gmail.com>
+Description:
+  Implements Zobrist (1970) Hash Table for game playing.
+License: MIT + file LICENSE
+LazyData: TRUE
+RoxygenNote: 5.0.1
+Imports:
+  stats,
+  utils
+Suggests: testthat
