@@ -2,6 +2,10 @@ library(zobrist)
 library(testthat)
 library(combiter)
 
+
+context("Hash table methods (update/find/delete/get)")
+
+
 test_that("update and get", {
   z <- zobristht(5, 4)
   expect_null(z$get(3))

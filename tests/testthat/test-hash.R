@@ -1,8 +1,9 @@
 library(zobrist)
 library(testthat)
+library(combiter)
 
 
-context("check behavior of hash function")
+context("Hash function")
 
 test_that("correct hashing", {
   z <- zobristht(5, 3)
@@ -33,3 +34,24 @@ test_that("invalid cases", {
   expect_warning(z$hashfunc(0))
 
 })
+
+
+
+test_that("using incr", {
+  z <- zobristht(7, 3)
+  key <- c(5, 2, 3, 7)
+  value <- 5
+  z$update(key, value)
+
+  iter <- isubset(4)
+  while (hasNext(iter))
+  {
+    i <- nextElem(iter)
+    x <- key[i]
+    y <- setdiff(key, x)
+    expect_equal(z$get(x, y), value)
+  }
+
+})
+
+
