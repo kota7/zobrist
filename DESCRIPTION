@@ -12,10 +12,10 @@ License: MIT + file LICENSE
 LazyData: TRUE
 RoxygenNote: 5.0.1
 Imports:
-  stats,
-  utils,
+    stats,
+    utils,
     Rcpp
 Suggests:
-  combiter,
-  testthat
+    combiter,
+    testthat
 LinkingTo: Rcpp

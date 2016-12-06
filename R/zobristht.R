@@ -1,7 +1,7 @@
 #' Create a Zobrist Hash Table
 #' @param keysize Positive integer. Bit size of keys
 #' @param hashsize Positive integer. Bit size of hash values
-#' @param rehash Logical. \code{TRUE} if
+#' @param rehashable Logical. \code{TRUE} if
 #' hashsize should be increased dynamically
 #' @param threslf Numeric. When \code{rehash = TRUE},
 #' rehashing is implemented when the load factor exceeds this value
@@ -17,31 +17,20 @@ zobristht <- function(keysize, hashsize,
   ### TODO: maximum hashsize? keysize?
   ###       limit for memory size?
 
-  ## initialize hash table ##
-  ## hash table is a list of the size 2^hashsize
-  ## a table entry is a named list corresponding to a key
-  hashtable <- lapply(1:(2^hashsize), function(a) list())
-
-  ## initializes quick memory map ##
-  ## this is a named integer vector of short size, where
-  ## the names represents the key and values represents the hash value
-  ## used to obtain hash values computed recently
-  ## At first, the vector is named with letters so it won't match any
-  ## keys.
-  quickmap <- setNames(integer(memorysize), LETTERS[1:memorysize])
-
-  ## generate random integers for each key positions
-  ## i-th number represents the hash value for a key such that
-  ## all but the i-th position is 1
-  randomint <- sample.int(2^hashsize - 1, keysize)
-
-  ## number of keys stored
-  numkey <- 0L
+  ## these are place holder for member fields
+  ## they are given values in initialize()
+  hashtable <- NULL
+  quickmap <- NULL
+  randomint <- NULL
+  numkey <- NULL
 
 
-  ## initialization proc
+  ## initialization procedure
   initialize <- function()
   {
+    ## initialize hash table ##
+    ## hash table is a list of the size 2^hashsize
+    ## a table entry is a named list corresponding to a key
     hashtable <<- lapply(1:(2^hashsize), function(a) list())
 
     ## initializes quick memory map ##
@@ -55,11 +44,17 @@ zobristht <- function(keysize, hashsize,
     ## generate random integers for each key positions
     ## i-th number represents the hash value for a key such that
     ## all but the i-th position is 1
-    randomint <<- sample.int(2^hashsize - 1, keysize)
-
+    if (keysize <= 2^hashsize - 1) {
+      randomint <<- sample.int(2^hashsize - 1, keysize)
+    } else {
+      randomint <<- sample.int(2^hashsize - 1, keysize, replace = TRUE)
+    }
     ## number of keys stored
     numkey <<- 0L
   }
+
+  initialize()
+
 
 
   ## define hash function
@@ -118,14 +113,19 @@ zobristht <- function(keysize, hashsize,
     hashfunc_vec_cpp(keys, randomint)
   }
 
+
+
   ## define methods
   ## - update(key, value)
   ## - delete(key)
   ## - find(key)
   ## - get(key)
-  update <- function(key, value, incr = integer(0))
+  locate <- function(key, incr = integer(0))
   {
-    ## get the hash value
+    # this function search for c(key, incr) in the hash table
+    # if if exists, returns a size 3 integer vector (i, j, k), such that
+    # hashtable[[i]][[j]] stores the key
+    # k equals 1 if and only if this key already exists
     hv <- hashfunc(key, incr)
     i <- hv + 1  # one-based index
     bitstr <- intvec_to_bitstring(c(key, incr), keysize)
@@ -133,67 +133,58 @@ zobristht <- function(keysize, hashsize,
     ## do we have this key already?
     flg <- bitstr == names(hashtable[[i]])
     if (any(flg)) {
-      ## there is one already -> update the value
+      ## there is one already
       j <- head(which(flg), 1)
-      hashtable[[i]][[j]] <<- value
+      k <- 1L
     } else {
-      ## this is a new key -> append to the list
-      hashtable[[i]] <<- c(hashtable[[i]],
-                           setNames(list(value), bitstr))
+      j <- length(NULL) + 1L
+      k <- 0L
+    }
+    c(i, j, k)
+  }
+
+  update <- function(key, value, incr = integer(0))
+  {
+    index <- locate(key, incr)
+    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
+    if (index[[3]] == 1L) {
+      hashtable[[index[1]]][[index[2]]] <<- value
+    } else {
+      hashtable[[index[1]]] <<- c(hashtable[[index[1]]],
+                                  setNames(list(value), bitstr))
       ## increment numkey
       numkey <<- numkey + 1L
       if (rehashable) rehash()  ## rehash if needed
     }
+    invisible(self)
   }
 
   delete <- function(key, incr = integer(0))
   {
-    ## get the hash value
-    hv <- hashfunc(key, incr)
-    i <- hv + 1  # one-based index
-    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
-
-    ## do we have this key already?
-    flg <- bitstr == names(hashtable[[i]])
-    if (any(flg)) {
-      ## there is one already -> update the value
-      j <- head(which(flg), 1)
-      hashtable[[i]][[j]] <<- NULL
+    index <- locate(key, incr)
+    if (index[[3]] == 1L) {
+      hashtable[[index[1]]][[index[2]]] <<- NULL
       ## decrement numkey
       numkey <<- numkey - 1L
     }
+    invisible(self)
   }
 
   find <- function(key, incr = integer(0))
   {
-    ## get the hash value
-    hv <- hashfunc(key, incr)
-    i <- hv + 1  # one-based index
-    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
-
-    ## do we have this key already?
-    flg <- bitstr == names(hashtable[[i]])
-    any(flg)
+    locate(key, incr)[3] == 1L
   }
 
   get <- function(key, incr = integer(0))
   {
-    ## get the hash value
-    hv <- hashfunc(key, incr)
-    i <- hv + 1  # one-based index
-    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
-
-    ## do we have this key already?
-    flg <- bitstr == names(hashtable[[i]])
-    if (any(flg)) {
-      ## there is one already -> return the value
-      j <- head(which(flg), 1)
-      return(hashtable[[i]][[j]])
+    index <- locate(key, incr)
+    if (index[3] == 1L) {
+      return(hashtable[[index[1]]][[index[2]]])
     } else {
-      ## this is a new key -> return NULL
       return(NULL)
     }
   }
+
 
   rehash <- function()
   {
@@ -224,6 +215,7 @@ zobristht <- function(keysize, hashsize,
   class(self) <- "zoristht"
   return(self)
 }
+
 
 
 
