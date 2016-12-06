@@ -10,7 +10,7 @@
 #' @return zobristhash object
 #' @export
 zobristht <- function(keysize, hashsize,
-                      rehash = FALSE, threslf = 0.9,
+                      rehashable = FALSE, threslf = 0.9,
                       memorysize = 10)
 {
   ## input validation
@@ -34,6 +34,32 @@ zobristht <- function(keysize, hashsize,
   ## i-th number represents the hash value for a key such that
   ## all but the i-th position is 1
   randomint <- sample.int(2^hashsize - 1, keysize)
+
+  ## number of keys stored
+  numkey <- 0L
+
+
+  ## initialization proc
+  initialize <- function()
+  {
+    hashtable <<- lapply(1:(2^hashsize), function(a) list())
+
+    ## initializes quick memory map ##
+    ## this is a named integer vector of short size, where
+    ## the names represents the key and values represents the hash value
+    ## used to obtain hash values computed recently
+    ## At first, the vector is named with letters so it won't match any
+    ## keys.
+    quickmap <<- setNames(integer(memorysize), LETTERS[1:memorysize])
+
+    ## generate random integers for each key positions
+    ## i-th number represents the hash value for a key such that
+    ## all but the i-th position is 1
+    randomint <<- sample.int(2^hashsize - 1, keysize)
+
+    ## number of keys stored
+    numkey <<- 0L
+  }
 
 
   ## define hash function
@@ -82,6 +108,16 @@ zobristht <- function(keysize, hashsize,
     return(unname(value))
   }
 
+  hashfunc_vec <- function(keys)
+  {
+    ## vectorized hash function
+    ##
+    ## keys: list of integer vectors
+
+    ### deploy by Rcpp
+    hashfunc_vec_cpp(keys, randomint)
+  }
+
   ## define methods
   ## - update(key, value)
   ## - delete(key)
@@ -104,6 +140,9 @@ zobristht <- function(keysize, hashsize,
       ## this is a new key -> append to the list
       hashtable[[i]] <<- c(hashtable[[i]],
                            setNames(list(value), bitstr))
+      ## increment numkey
+      numkey <<- numkey + 1L
+      if (rehashable) rehash()  ## rehash if needed
     }
   }
 
@@ -120,6 +159,8 @@ zobristht <- function(keysize, hashsize,
       ## there is one already -> update the value
       j <- head(which(flg), 1)
       hashtable[[i]][[j]] <<- NULL
+      ## decrement numkey
+      numkey <<- numkey - 1L
     }
   }
 
@@ -152,6 +193,31 @@ zobristht <- function(keysize, hashsize,
       ## this is a new key -> return NULL
       return(NULL)
     }
+  }
+
+  rehash <- function()
+  {
+    ## when the load factor = n.key / ht.size becomes too large,
+    ## i.e. there are too many keys stored per hash value,
+    ## we want to 'rehash' to make a larger hash table
+
+    lf <- numkey / 2^hashsize
+    if (lf > threslf) {
+      tmp <- hashtable  ## make a copy of old table
+
+      ## set new hash bit size
+      hashsize <<- ceiling(log2(numkey/threslf))
+
+      ## then initialize
+      initialize()
+
+      ## copy old entries one by one
+      tmp <- unlist(tmp, recursive = FALSE)
+      keys <- bitstring_to_intvec(names(tmp))
+      Map(update, keys, tmp)
+      ## TODO: use Rcpp for this rountine
+    }
+
   }
 
   self <- environment()
@@ -192,3 +258,14 @@ intvec_to_bitstring <- function(key, keysize)
 }
 
 
+
+bitstring_to_intvec <- function(bitstr)
+{
+  # internal function to convert bitstrings to integer vector
+  #
+  # bitstr: character vector
+  #
+  # Returns:
+  #   list of integer vectors
+  lapply(lapply(strsplit(bitstr, ""), `==`, "1"), which)
+}

@@ -13,7 +13,9 @@ LazyData: TRUE
 RoxygenNote: 5.0.1
 Imports:
   stats,
-  utils
+  utils,
+    Rcpp
 Suggests:
   combiter,
   testthat
+LinkingTo: Rcpp

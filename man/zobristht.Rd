@@ -4,7 +4,7 @@
 \alias{zobristht}
 \title{Create a Zobrist Hash Table}
 \usage{
-zobristht(keysize, hashsize, rehash = FALSE, threslf = 0.9,
+zobristht(keysize, hashsize, rehashable = FALSE, threslf = 0.9,
   memorysize = 10)
 }
 \arguments{
@@ -12,14 +12,14 @@ zobristht(keysize, hashsize, rehash = FALSE, threslf = 0.9,
 
 \item{hashsize}{Positive integer. Bit size of hash values}
 
-\item{rehash}{Logical. \code{TRUE} if
-hashsize should be increased dynamically}
-
 \item{threslf}{Numeric. When \code{rehash = TRUE},
 rehashing is implemented when the load factor exceeds this value}
 
 \item{memorysize}{Nonnegative integer. This specifies how many recent
 hash values to be memorized for a quick access}
+
+\item{rehash}{Logical. \code{TRUE} if
+hashsize should be increased dynamically}
 }
 \value{
 zobristhash object

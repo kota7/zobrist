@@ -55,3 +55,27 @@ test_that("using incr", {
 })
 
 
+
+
+test_that("vectorized version", {
+  z <- zobristht(7, 4)
+
+  key <- c(5, 2, 3, 7)
+
+  iter <- isubset(4)
+  h1 <- integer(0)
+  keys <- list()
+  while (hasNext(iter))
+  {
+    i <- nextElem(iter)
+    x <- key[i]
+    h1 <- c(h1, z$hashfunc(x))
+    keys <- c(keys, list(x))
+  }
+  h2 <- z$hashfunc_vec(keys)
+  expect_true(all(h1 == h2))
+
+})
+
+
+
