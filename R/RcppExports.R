@@ -5,3 +5,7 @@ hashfunc_vec_cpp <- function(keys, randomint) {
     .Call('zobrist_hashfunc_vec_cpp', PACKAGE = 'zobrist', keys, randomint)
 }
 
+MakeHashTable <- function(keys, key_names, values) {
+    .Call('zobrist_MakeHashTable', PACKAGE = 'zobrist', keys, key_names, values)
+}
+
