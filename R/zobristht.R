@@ -214,46 +214,46 @@ zobristht <- function(keysize, hashsize,
 
 
 
-
-
-intvec_to_bitstring <- function(key, keysize)
-{
-  # internal function to convert a key given in integer vector
-  # into a bitstring (reverser order)
-  #
-  # key:     integer vector that represents the position of positive keys
-  # keysize: bit size of key
-  #
-  # returns:
-  #   bistring in a reverse order
-
-  #cat("key = ", key, "\n")
-  if (!is.numeric(key)) stop("key must be an integer vector")
-
-  key <- as.integer(key)  # just in case key includes decimals
-  # we can only use the indices between 1 to keysize
-  # warn if key includes any number out of bounds
-  check <- (key >= 1L) & (key <= keysize)
-  if (!all(check)) {
-    warning("Following indices are out-of-bounds and ignored:\n ",
-            paste0(key[!check], collapse = ", "), "\n")
-    key <- key[check]
-  }
-
-  out <- rep("0", keysize)
-  out[key] <- "1"
-  paste0(out, collapse = "")
-}
-
-
-
-bitstring_to_intvec <- function(bitstr)
-{
-  # internal function to convert bitstrings to integer vector
-  #
-  # bitstr: character vector
-  #
-  # Returns:
-  #   list of integer vectors
-  lapply(lapply(strsplit(bitstr, ""), `==`, "1"), which)
-}
+# deprecated
+#
+# intvec_to_bitstring <- function(key, keysize)
+# {
+#   # internal function to convert a key given in integer vector
+#   # into a bitstring (reverser order)
+#   #
+#   # key:     integer vector that represents the position of positive keys
+#   # keysize: bit size of key
+#   #
+#   # returns:
+#   #   bistring in a reverse order
+#
+#   #cat("key = ", key, "\n")
+#   if (!is.numeric(key)) stop("key must be an integer vector")
+#
+#   key <- as.integer(key)  # just in case key includes decimals
+#   # we can only use the indices between 1 to keysize
+#   # warn if key includes any number out of bounds
+#   check <- (key >= 1L) & (key <= keysize)
+#   if (!all(check)) {
+#     warning("Following indices are out-of-bounds and ignored:\n ",
+#             paste0(key[!check], collapse = ", "), "\n")
+#     key <- key[check]
+#   }
+#
+#   out <- rep("0", keysize)
+#   out[key] <- "1"
+#   paste0(out, collapse = "")
+# }
+#
+#
+#
+# bitstring_to_intvec <- function(bitstr)
+# {
+#   # internal function to convert bitstrings to integer vector
+#   #
+#   # bitstr: character vector
+#   #
+#   # Returns:
+#   #   list of integer vectors
+#   lapply(lapply(strsplit(bitstr, ""), `==`, "1"), which)
+# }
