@@ -66,15 +66,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // MakeHashTable
-List MakeHashTable(std::vector< std::vector<int> > keys, CharacterVector key_names, List values);
-RcppExport SEXP zobrist_MakeHashTable(SEXP keysSEXP, SEXP key_namesSEXP, SEXP valuesSEXP) {
+List MakeHashTable(int htsize, List values, IntegerVector index);
+RcppExport SEXP zobrist_MakeHashTable(SEXP htsizeSEXP, SEXP valuesSEXP, SEXP indexSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector< std::vector<int> > >::type keys(keysSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type key_names(key_namesSEXP);
+    Rcpp::traits::input_parameter< int >::type htsize(htsizeSEXP);
     Rcpp::traits::input_parameter< List >::type values(valuesSEXP);
-    rcpp_result_gen = Rcpp::wrap(MakeHashTable(keys, key_names, values));
+    Rcpp::traits::input_parameter< IntegerVector >::type index(indexSEXP);
+    rcpp_result_gen = Rcpp::wrap(MakeHashTable(htsize, values, index));
     return rcpp_result_gen;
 END_RCPP
 }

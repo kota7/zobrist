@@ -21,7 +21,7 @@ StrsToKeys <- function(x, keysize) {
     .Call('zobrist_StrsToKeys', PACKAGE = 'zobrist', x, keysize)
 }
 
-MakeHashTable <- function(keys, key_names, values) {
-    .Call('zobrist_MakeHashTable', PACKAGE = 'zobrist', keys, key_names, values)
+MakeHashTable <- function(htsize, values, index) {
+    .Call('zobrist_MakeHashTable', PACKAGE = 'zobrist', htsize, values, index)
 }
 
