@@ -200,7 +200,6 @@ zobristht <- function(keysize, hashsize,
 
       ## copy old entries one by one
       tmp <- unlist(tmp, recursive = FALSE)
-      #cat("length before = ", length(tmp), "\n")
       keys <- StrsToKeys(names(tmp), keysize)
       hvs  <- hashfunc_vec_cpp(keys, randomint)
 

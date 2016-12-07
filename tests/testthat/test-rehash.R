@@ -16,7 +16,7 @@ test_that("Rehash", {
     z$update(i, sum(i))
   }
 
-  ## check if the values are correctly stored
+  ## check if the values are still correctly stored
   iter <- isubset(5)
   while (hasNext(iter))
   {
