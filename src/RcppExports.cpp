@@ -17,6 +17,50 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// KeyToStr
+std::string KeyToStr(IntegerVector x);
+RcppExport SEXP zobrist_KeyToStr(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(KeyToStr(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// StrToKey
+IntegerVector StrToKey(std::string x);
+RcppExport SEXP zobrist_StrToKey(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(StrToKey(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// KeysToStrs
+CharacterVector KeysToStrs(ListOf<IntegerVector> x);
+RcppExport SEXP zobrist_KeysToStrs(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ListOf<IntegerVector> >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(KeysToStrs(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// StrsToKeys
+ListOf<IntegerVector> StrsToKeys(CharacterVector x);
+RcppExport SEXP zobrist_StrsToKeys(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(StrsToKeys(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // MakeHashTable
 List MakeHashTable(std::vector< std::vector<int> > keys, CharacterVector key_names, List values);
 RcppExport SEXP zobrist_MakeHashTable(SEXP keysSEXP, SEXP key_namesSEXP, SEXP valuesSEXP) {

@@ -3,7 +3,8 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 IntegerVector hashfunc_vec_cpp(std::vector< std::vector<int> > keys,
-                             IntegerVector randomint) {
+                             IntegerVector randomint)
+{
   long long n = keys.size();
   IntegerVector out(n);
 

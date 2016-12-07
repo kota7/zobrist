@@ -5,6 +5,22 @@ hashfunc_vec_cpp <- function(keys, randomint) {
     .Call('zobrist_hashfunc_vec_cpp', PACKAGE = 'zobrist', keys, randomint)
 }
 
+KeyToStr <- function(x) {
+    .Call('zobrist_KeyToStr', PACKAGE = 'zobrist', x)
+}
+
+StrToKey <- function(x) {
+    .Call('zobrist_StrToKey', PACKAGE = 'zobrist', x)
+}
+
+KeysToStrs <- function(x) {
+    .Call('zobrist_KeysToStrs', PACKAGE = 'zobrist', x)
+}
+
+StrsToKeys <- function(x) {
+    .Call('zobrist_StrsToKeys', PACKAGE = 'zobrist', x)
+}
+
 MakeHashTable <- function(keys, key_names, values) {
     .Call('zobrist_MakeHashTable', PACKAGE = 'zobrist', keys, key_names, values)
 }
