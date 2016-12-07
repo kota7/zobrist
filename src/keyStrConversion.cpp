@@ -62,13 +62,15 @@ std::string hex_to_bin(const char hex)
 
 
 // [[Rcpp::export]]
-std::string KeyToStr(IntegerVector x)
+std::string KeyToStr(IntegerVector x, int keysize)
 {
   // Converts a key represented by integer vector to
   // string that represents the key
   // This is the inverse function of StrToKey()
   //
-  // x   : IntegerVector one-based indices for positions of ones
+  // x       : IntegerVector one-based indices for positions of ones
+  // keysize : bit size of key
+  //
   //
   //
   // Returns:
@@ -81,29 +83,51 @@ std::string KeyToStr(IntegerVector x)
   //   -> "0101 1"
   //   -> "A1"    in hex form
 
-  if (x.size() == 0) return "0";
+  // input validation
+  // check if 1 <= x <= keysize
+  for (int i = 0; i < x.size(); i++)
+  {
+    if (x[i] < 1 || x[i] > keysize) {
+      warning("index is out of bounds is ignored");
+    }
+  }
 
+
+  int outsize = (keysize + 3) / 4;
+
+  if (x.size() == 0) return std::string(outsize, '0');
+
+
+  // determine the binary string size
+  // first, find the maximum index in x, then
+  // truncate by keysize
   int n = max(x);
-  n = n + 3 - ((n-1) % 4); // make sure n is a multiple of 4
+  if (n > keysize) n = keysize;
+  n = n + 3 - ((n-1) % 4); // this is to make sure n is a multiple of 4
   std::string bin(n, '0');
-  for (int i = 0; i <  x.size(); i++) bin[x[i] - 1] = '1';
+  for (int i = 0; i <  x.size(); i++)
+    bin[x[i] - 1] = bin[x[i] - 1] == '0' ? '1':'0';
 
 
-  std::string out(n/4, ' ');
+  std::string out(outsize, '0');
   for (unsigned int j = 0; j < out.size(); j++)
+  {
+    if (j*4 >= bin.size()) break;
     out[j] = bin_to_hex(bin.substr(j*4, 4));
+  }
 
   return out;
 }
 
 
 // [[Rcpp::export]]
-IntegerVector StrToKey(std::string x)
+IntegerVector StrToKey(std::string x, int keysize)
 {
   // Converts a string to an integer vector that the key represents
   // This is the inverse function of KeyToStr()
   //
-  // x: string consisting of digits and a-f
+  // x       : string consisting of digits and a-f
+  // keysize : maximum index allowed
   //
   // Returns:
   //   IntegerVector the corresponds to the string
@@ -117,10 +141,13 @@ IntegerVector StrToKey(std::string x)
   std::string bin(n*4, ' ');
   for (int i = 0; i < n; i++)
     bin.replace(i*4, 4, hex_to_bin(x[i]));
+  // discard redundant entries
+  bin.resize(keysize);
 
   IntegerVector out;
   for (size_t i = 0; i < bin.size(); i++)
     if (bin[i] == '1') out.push_back(i+1);
+
   return out;
 }
 
@@ -129,23 +156,23 @@ IntegerVector StrToKey(std::string x)
 
 // vectorized versions
 // [[Rcpp::export]]
-CharacterVector KeysToStrs(ListOf<IntegerVector> x)
+CharacterVector KeysToStrs(ListOf<IntegerVector> x, int keysize)
 {
   int n = x.size();
   CharacterVector out(n);
   for (int i = 0; i < n; i++)
-    out[i] = KeyToStr(x[i]);
+    out[i] = KeyToStr(x[i], keysize);
   return out;
 }
 
 // [[Rcpp::export]]
-ListOf<IntegerVector> StrsToKeys(CharacterVector x)
+ListOf<IntegerVector> StrsToKeys(CharacterVector x, int keysize)
 {
   int n = x.size();
   //ListOf<IntegerVector> out;
   List out;
   for (int i = 0; i < n; i++)
-    out.push_back(StrToKey(as<std::string>(x[i])));
+    out.push_back(StrToKey(as<std::string>(x[i]), keysize));
     //out[i] = StrToKey(as<std::string>(x[i]));
 
   return out;

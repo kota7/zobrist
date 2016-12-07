@@ -18,46 +18,50 @@ BEGIN_RCPP
 END_RCPP
 }
 // KeyToStr
-std::string KeyToStr(IntegerVector x);
-RcppExport SEXP zobrist_KeyToStr(SEXP xSEXP) {
+std::string KeyToStr(IntegerVector x, int keysize);
+RcppExport SEXP zobrist_KeyToStr(SEXP xSEXP, SEXP keysizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(KeyToStr(x));
+    Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(KeyToStr(x, keysize));
     return rcpp_result_gen;
 END_RCPP
 }
 // StrToKey
-IntegerVector StrToKey(std::string x);
-RcppExport SEXP zobrist_StrToKey(SEXP xSEXP) {
+IntegerVector StrToKey(std::string x, int keysize);
+RcppExport SEXP zobrist_StrToKey(SEXP xSEXP, SEXP keysizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(StrToKey(x));
+    Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(StrToKey(x, keysize));
     return rcpp_result_gen;
 END_RCPP
 }
 // KeysToStrs
-CharacterVector KeysToStrs(ListOf<IntegerVector> x);
-RcppExport SEXP zobrist_KeysToStrs(SEXP xSEXP) {
+CharacterVector KeysToStrs(ListOf<IntegerVector> x, int keysize);
+RcppExport SEXP zobrist_KeysToStrs(SEXP xSEXP, SEXP keysizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< ListOf<IntegerVector> >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(KeysToStrs(x));
+    Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(KeysToStrs(x, keysize));
     return rcpp_result_gen;
 END_RCPP
 }
 // StrsToKeys
-ListOf<IntegerVector> StrsToKeys(CharacterVector x);
-RcppExport SEXP zobrist_StrsToKeys(SEXP xSEXP) {
+ListOf<IntegerVector> StrsToKeys(CharacterVector x, int keysize);
+RcppExport SEXP zobrist_StrsToKeys(SEXP xSEXP, SEXP keysizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(StrsToKeys(x));
+    Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(StrsToKeys(x, keysize));
     return rcpp_result_gen;
 END_RCPP
 }

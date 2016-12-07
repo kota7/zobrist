@@ -63,17 +63,14 @@ zobristht <- function(keysize, hashsize,
     # key     : an integer vector representing the positive key entries
     # incr : an integer vector representing additional entries
 
-    bitstr1 <- intvec_to_bitstring(key, keysize)
-    bitstr2 <- intvec_to_bitstring(c(key, incr), keysize)
-    #cat("bitstr1 = ", bitstr1, "\n")
-    #cat("bitstr2 = ", bitstr2, "\n")
+    str1 <- KeyToStr(key, keysize)
+    str2 <- KeyToStr(c(key, incr), keysize)
 
 
     ## first, check if bitstr2 is in the memory.
     ## if it is, we are done. just return the hash value
-    flg <- as.character(bitstr2) == names(quickmap)
+    flg <- as.character(str2) == names(quickmap)
     if (any(flg)) {
-      #cat(bitstr2, "found in", which(flg), "\n")
       index <- head(which(flg), 1)
       value <- quickmap[index]
       # re-order the quickmap so that the current hash value is the last
@@ -84,22 +81,21 @@ zobristht <- function(keysize, hashsize,
     ## second, check if bitstr1 is in the memory.
     ## if it is, then we can compute the hash value of bitstr2
     ## easily by XOR-ing the offsets
-    flg <- as.character(bitstr1) == names(quickmap)
+    flg <- as.character(str1) == names(quickmap)
     if (any(flg)) {
-      #cat(bitstr1, "found in", which(flg), "\n")
       index <- head(which(flg), 1)
       value <- quickmap[index]
       quickmap <<- c(quickmap[-index], quickmap[index])
-      ## value for bitstr2
+      ## value for str2
       value <- Reduce(bitwXor, randomint[incr], value)
       # add the new value to the quick map
-      quickmap <<- c(quickmap[-1], setNames(value, bitstr2))
+      quickmap <<- c(quickmap[-1], setNames(value, str2))
       return(unname(value))
     }
 
     ## third, we will compute the hash value from scratch
     value <- Reduce(bitwXor, randomint[c(key, incr)], 0L)
-    quickmap <<- c(quickmap[-1], setNames(value, bitstr2))
+    quickmap <<- c(quickmap[-1], setNames(value, str2))
     return(unname(value))
   }
 
@@ -128,10 +124,10 @@ zobristht <- function(keysize, hashsize,
     # k equals 1 if and only if this key already exists
     hv <- hashfunc(key, incr)
     i <- hv + 1  # one-based index
-    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
+    str <- KeyToStr(c(key, incr), keysize)
 
     ## do we have this key already?
-    flg <- bitstr == names(hashtable[[i]])
+    flg <- str == names(hashtable[[i]])
     if (any(flg)) {
       ## there is one already
       j <- head(which(flg), 1)
@@ -146,12 +142,12 @@ zobristht <- function(keysize, hashsize,
   update <- function(key, value, incr = integer(0))
   {
     index <- locate(key, incr)
-    bitstr <- intvec_to_bitstring(c(key, incr), keysize)
+    str <- KeyToStr(c(key, incr), keysize)
     if (index[[3]] == 1L) {
       hashtable[[index[1]]][[index[2]]] <<- value
     } else {
       hashtable[[index[1]]] <<- c(hashtable[[index[1]]],
-                                  setNames(list(value), bitstr))
+                                  setNames(list(value), str))
       ## increment numkey
       numkey <<- numkey + 1L
       if (rehashable) rehash()  ## rehash if needed
@@ -204,7 +200,7 @@ zobristht <- function(keysize, hashsize,
 
       ## copy old entries one by one
       tmp <- unlist(tmp, recursive = FALSE)
-      keys <- bitstring_to_intvec(names(tmp))
+      keys <- StrsToKeys(names(tmp), keysize)
       Map(update, keys, tmp)
       ## TODO: use Rcpp for this rountine
     }
