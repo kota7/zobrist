@@ -211,6 +211,15 @@ zobristht <- function(keysize, hashsize,
 
   }
 
+  clone <- function()
+  {
+    # create a copy of, not a reference to, this object
+
+    out <- zobristht(keysize, hashsize, rehashable, threslf, memorysize)
+    out$hashtable <- self$hashtable
+    out
+  }
+
   self <- environment()
   class(self) <- "zoristht"
   return(self)
