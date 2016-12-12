@@ -292,13 +292,13 @@ simulate <- function(times = 1000)
 
 
 
-
+set.seed(87)
 Vfunc <- zobristht(20, 10, rehashable = TRUE)
 
 ## save low level AI
-ttt_value0 <- Vfunc$clone()
-devtools::use_data(ttt_value0, overwrite = TRUE)
-rm(ttt_value0)
+ttt_value1 <- Vfunc$clone()
+devtools::use_data(ttt_value1, overwrite = TRUE, internal = TRUE)
+rm(ttt_value1)
 
 
 res <- simulate()
@@ -321,22 +321,22 @@ for (i in 1:max_train)
 
 
   if (i == 1000) {
-    ttt_value1 <- Vfunc$clone()
-    devtools::use_data(ttt_value1, overwrite = TRUE)
-    rm(ttt_value1)
+    ttt_value2 <- Vfunc$clone()
+    devtools::use_data(ttt_value2, overwrite = TRUE, internal = TRUE)
+    rm(ttt_value2)
   }
 
 
   if (i == 1500) {
-    ttt_value2 <- Vfunc$clone()
-    devtools::use_data(ttt_value2, overwrite = TRUE)
-    rm(ttt_value2)
+    ttt_value3 <- Vfunc$clone()
+    devtools::use_data(ttt_value3, overwrite = TRUE, internal = TRUE)
+    rm(ttt_value3)
   }
 
   if (i == 5000) {
-    ttt_value3 <- Vfunc$clone()
-    devtools::use_data(ttt_value3, overwrite = TRUE)
-    rm(ttt_value3)
+    ttt_value4 <- Vfunc$clone()
+    devtools::use_data(ttt_value4, overwrite = TRUE, internal = TRUE)
+    rm(ttt_value4)
   }
 
 }
@@ -356,5 +356,6 @@ ggplot(dat, aes(simulation, frac, linetype = result, shape = result)) +
   geom_point(size = 1.5, color = "grey10") +
   xlab("number of training") + ylab("fraction") +
   theme_bw()
+if (!dir.exists("example/output")) dir.create("example/output")
 ggsave("example/output/ttt-learning-curve.pdf", width = 10, height = 6)
 ggsave("example/output/ttt-learning-curve.png", width = 10, height = 6)
