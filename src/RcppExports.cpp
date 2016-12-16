@@ -5,27 +5,27 @@
 
 using namespace Rcpp;
 
-// hashfunc
-int hashfunc(IntegerVector& key, std::vector<unsigned int>& randomint);
-RcppExport SEXP zobrist_hashfunc(SEXP keySEXP, SEXP randomintSEXP) {
+// ZobristHash
+int ZobristHash(IntegerVector& key, std::vector<unsigned int>& randomint);
+RcppExport SEXP zobrist_ZobristHash(SEXP keySEXP, SEXP randomintSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< IntegerVector& >::type key(keySEXP);
     Rcpp::traits::input_parameter< std::vector<unsigned int>& >::type randomint(randomintSEXP);
-    rcpp_result_gen = Rcpp::wrap(hashfunc(key, randomint));
+    rcpp_result_gen = Rcpp::wrap(ZobristHash(key, randomint));
     return rcpp_result_gen;
 END_RCPP
 }
-// hashfunc_vec_cpp
-IntegerVector hashfunc_vec_cpp(std::vector< std::vector<int> >& keys, std::vector<unsigned int>& randomint);
-RcppExport SEXP zobrist_hashfunc_vec_cpp(SEXP keysSEXP, SEXP randomintSEXP) {
+// ZobristHash_vec
+IntegerVector ZobristHash_vec(std::vector< std::vector<int> >& keys, std::vector<unsigned int>& randomint);
+RcppExport SEXP zobrist_ZobristHash_vec(SEXP keysSEXP, SEXP randomintSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::vector< std::vector<int> >& >::type keys(keysSEXP);
     Rcpp::traits::input_parameter< std::vector<unsigned int>& >::type randomint(randomintSEXP);
-    rcpp_result_gen = Rcpp::wrap(hashfunc_vec_cpp(keys, randomint));
+    rcpp_result_gen = Rcpp::wrap(ZobristHash_vec(keys, randomint));
     return rcpp_result_gen;
 END_RCPP
 }

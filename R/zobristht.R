@@ -102,15 +102,8 @@ zobristht <- function(keysize, hashsize,
 
   hashfunc_vec <- function(keys)
   {
-    ## vectorized hash function
-    ##
-    ## keys: list of integer vectors
-
-    ### deploy by Rcpp
-    hashfunc_vec_cpp(keys, randomint)
+    ZobristHash_vec(keys, randomint)
   }
-
-
 
   ## define methods
   ## - update(key, value)
@@ -205,7 +198,7 @@ zobristht <- function(keysize, hashsize,
       ## copy old entries one by one
       tmp <- unlist(tmp, recursive = FALSE)
       keys <- StrsToKeys(names(tmp), keysize)
-      hvs  <- hashfunc_vec_cpp(keys, randomint)
+      hvs  <- ZobristHash_vec(keys, randomint)
 
       #Map(update, keys, tmp)
       hashtable <<- MakeHashTable(length(hashtable), tmp, hvs)

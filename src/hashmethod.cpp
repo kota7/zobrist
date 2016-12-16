@@ -10,7 +10,7 @@ IntegerVector LocateKey(IntegerVector &key, int keysize,
                         ListOf<List> &hashtable)
 {
   IntegerVector out(3);
-  int hv = hashfunc(key, randomint);
+  int hv = ZobristHash(key, randomint);
   std::string str = KeyToStr(key, keysize);
 
   if (hashtable[hv].size() == 0) {
