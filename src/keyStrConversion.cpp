@@ -1,6 +1,7 @@
 #include <Rcpp.h>
 #include <string>
 #include <map>
+#include "keyStrConversion.h"
 using namespace Rcpp;
 
 // Naming rule of the hash table entries
@@ -61,7 +62,6 @@ std::string hex_to_bin(const char hex)
 }
 
 
-// [[Rcpp::export]]
 std::string KeyToStr(IntegerVector x, int keysize)
 {
   // Converts a key represented by integer vector to
@@ -120,7 +120,6 @@ std::string KeyToStr(IntegerVector x, int keysize)
 }
 
 
-// [[Rcpp::export]]
 IntegerVector StrToKey(std::string x, int keysize)
 {
   // Converts a string to an integer vector that the key represents
@@ -154,8 +153,6 @@ IntegerVector StrToKey(std::string x, int keysize)
 
 
 
-// vectorized versions
-// [[Rcpp::export]]
 CharacterVector KeysToStrs(ListOf<IntegerVector> x, int keysize)
 {
   int n = x.size();
@@ -165,7 +162,6 @@ CharacterVector KeysToStrs(ListOf<IntegerVector> x, int keysize)
   return out;
 }
 
-// [[Rcpp::export]]
 ListOf<IntegerVector> StrsToKeys(CharacterVector x, int keysize)
 {
   int n = x.size();
@@ -179,5 +175,3 @@ ListOf<IntegerVector> StrsToKeys(CharacterVector x, int keysize)
 }
 
 
-/*** R
-*/
