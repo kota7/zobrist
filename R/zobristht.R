@@ -14,8 +14,9 @@ zobristht <- function(keysize, hashsize,
                       memorysize = 10)
 {
   ## input validation
-  ### TODO: maximum hashsize? keysize?
-  ###       limit for memory size?
+  stopifnot(hashsize > 0)
+  stopifnot(keysize > 0)
+  if (hashsize > 32) stop("hashsize cannot be greater than 32")
 
   ## these are place holder for member fields
   ## they are given values in initialize()
@@ -187,6 +188,9 @@ zobristht <- function(keysize, hashsize,
     ## when the load factor = n.key / ht.size becomes too large,
     ## i.e. there are too many keys stored per hash value,
     ## we want to 'rehash' to make a larger hash table
+
+    ## hash size limit is 32
+    if (hashsize >= 32) return()
 
     lf <- numkey / 2^hashsize
     if (lf > threslf) {

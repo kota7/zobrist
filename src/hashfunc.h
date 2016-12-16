@@ -8,11 +8,11 @@ using namespace Rcpp;
 
 
 // [[Rcpp::export]]
-int hashfunc(IntegerVector &key, IntegerVector &randomint);
+int hashfunc(IntegerVector &key, std::vector<unsigned int> &randomint);
 
 
 // [[Rcpp::export]]
 IntegerVector hashfunc_vec_cpp(std::vector< std::vector<int> > &keys,
-                               IntegerVector &randomint);
+                               std::vector<unsigned int> &randomint);
 
 #endif

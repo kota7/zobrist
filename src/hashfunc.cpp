@@ -4,7 +4,7 @@
 using namespace Rcpp;
 
 
-int hashfunc(IntegerVector &key, IntegerVector &randomint)
+int hashfunc(IntegerVector &key, std::vector<unsigned int> &randomint)
 {
   int out = 0;
   for (size_t j = 0; j < key.size(); j++) out ^= randomint[key[j]-1];
@@ -14,7 +14,7 @@ int hashfunc(IntegerVector &key, IntegerVector &randomint)
 
 
 IntegerVector hashfunc_vec_cpp(std::vector< std::vector<int> > &keys,
-                               IntegerVector &randomint)
+                               std::vector<unsigned int> &randomint)
 {
   int n = keys.size();
   IntegerVector out(n);

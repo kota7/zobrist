@@ -6,8 +6,8 @@ using namespace Rcpp;
 
 
 IntegerVector LocateKey(IntegerVector &key, int keysize,
-                     IntegerVector &randomint,
-                     ListOf<List> &hashtable)
+                        std::vector<unsigned int> &randomint,
+                        ListOf<List> &hashtable)
 {
   IntegerVector out(3);
   int hv = hashfunc(key, randomint);
@@ -43,7 +43,7 @@ IntegerVector LocateKey(IntegerVector &key, int keysize,
 
 IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
                          int keysize,
-                         IntegerVector &randomint,
+                         std::vector<unsigned int> &randomint,
                          ListOf<List> &hashtable)
 {
   // locate keys in hashtable
@@ -75,7 +75,7 @@ IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
 
 
 List GetValueByKey(IntegerVector &key, int keysize,
-                   IntegerVector &randomint,
+                   std::vector<unsigned int> &randomint,
                    ListOf<List> &hashtable)
 {
   IntegerVector location = LocateKey(key, keysize, randomint, hashtable);
@@ -86,7 +86,7 @@ List GetValueByKey(IntegerVector &key, int keysize,
 
 List GetValueByKeys(ListOf<IntegerVector> &keys,
                     int keysize,
-                    IntegerVector &randomint,
+                    std::vector<unsigned int> &randomint,
                     ListOf<List> &hashtable)
 {
   IntegerMatrix locations = LocateKeys(keys, keysize, randomint, hashtable);
@@ -106,14 +106,14 @@ List GetValueByKeys(ListOf<IntegerVector> &keys,
 
 
 bool FindKey(IntegerVector &key, int keysize,
-             IntegerVector &randomint,
+             std::vector<unsigned int> &randomint,
              ListOf<List> &hashtable)
 {
   return (LocateKey(key, keysize, randomint, hashtable)[2] == 1);
 }
 
 LogicalVector FindKeys(ListOf<IntegerVector> &keys, int keysize,
-                       IntegerVector &randomint,
+                       std::vector<unsigned int> &randomint,
                        ListOf<List> &hashtable)
 {
   int n = keys.size();
@@ -127,6 +127,7 @@ LogicalVector FindKeys(ListOf<IntegerVector> &keys, int keysize,
 
 
 /*** R
+library(zobrist)
 z <- zobristht(5, 4)
 zobrist:::LocateKey(4, z$keysize, z$randomint, z$hashtable)
 zobrist:::LocateKeys(list(3, 4), z$keysize, z$randomint, z$hashtable)
