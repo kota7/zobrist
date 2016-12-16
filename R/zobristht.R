@@ -236,17 +236,17 @@ zobristht <- function(keysize, hashsize,
 }
 
 
-#' @export
-`[<-.zobristht` <- function(obj, key, value, increment = numeric(0))
-{
-  obj$update(key, value, increment)
-}
-
-#' @export
-haskey <- function(obj, ...) { UseMethod("haskey") }
-
-#' @export
-haskey.zobristht <- function(obj, key, increment, ...)
-{
-  obj$find(key, increment)
-}
+# #' @export
+# `[<-.zobristht` <- function(obj, key, value, increment = numeric(0))
+# {
+#   obj$update(key, value, increment)
+# }
+#
+# #' @export
+# haskey <- function(obj, ...) { UseMethod("haskey") }
+#
+# #' @export
+# haskey.zobristht <- function(obj, key, increment, ...)
+# {
+#   obj$find(key, increment)
+# }
