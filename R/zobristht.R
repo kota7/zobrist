@@ -1,17 +1,20 @@
 #' Create a Zobrist Hash Table
 #' @param keysize Positive integer. Bit size of keys
 #' @param hashsize Positive integer. Bit size of hash values
+#' @param convfunc Function that converts state into key.
+#' If not specified, it is assumed that the state is identical to key.
+#' If specified, the function must take \code{state} as the first entry,
+#' and keyword arguments \code{...}.  See details.
 #' @param rehashable Logical. \code{TRUE} if
 #' hashsize should be increased dynamically
 #' @param threslf Numeric. When \code{rehash = TRUE},
 #' rehashing is implemented when the load factor exceeds this value
-#' @param memorysize Nonnegative integer. This specifies how many recent
-#' hash values to be memorized for a quick access
-#' @return zobristhash object
+#' @return zht object
+#' @details to be added
 #' @export
-zobristht <- function(keysize, hashsize,
-                      rehashable = FALSE, threslf = 0.9,
-                      memorysize = 10)
+zht <- function(keysize,
+                hashsize = 10, convfunc = NULL,
+                rehashable = FALSE, threslf = 0.9)
 {
   ## input validation
   stopifnot(hashsize > 0)
@@ -21,10 +24,8 @@ zobristht <- function(keysize, hashsize,
   ## these are place holder for member fields
   ## they are given values in initialize()
   hashtable <- NULL
-  quickmap <- NULL
   randomint <- NULL
   numkey <- NULL
-
 
   ## initialization procedure
   initialize <- function()
@@ -33,14 +34,6 @@ zobristht <- function(keysize, hashsize,
     ## hash table is a list of the size 2^hashsize
     ## a table entry is a named list corresponding to a key
     hashtable <<- lapply(1:(2^hashsize), function(a) list())
-
-    ## initializes quick memory map ##
-    ## this is a named integer vector of short size, where
-    ## the names represents the key and values represents the hash value
-    ## used to obtain hash values computed recently
-    ## At first, the vector is named with letters so it won't match any
-    ## keys.
-    quickmap <<- setNames(integer(memorysize), LETTERS[1:memorysize])
 
     ## generate random integers for each key positions
     ## i-th number represents the hash value for a key such that
@@ -53,126 +46,60 @@ zobristht <- function(keysize, hashsize,
     ## number of keys stored
     numkey <<- 0L
   }
-
   initialize()
 
 
-
-  ## define hash function
-  hashfunc <- function(key, incr = integer(0))
+  ## hash operators
+  insert <- function(state, value, ...)
   {
-    # key     : an integer vector representing the positive key entries
-    # incr : an integer vector representing additional entries
-
-    str1 <- KeyToStr(key, keysize)
-    str2 <- KeyToStr(c(key, incr), keysize)
-
-
-    ## first, check if bitstr2 is in the memory.
-    ## if it is, we are done. just return the hash value
-    flg <- as.character(str2) == names(quickmap)
-    if (any(flg)) {
-      index <- head(which(flg), 1)
-      value <- quickmap[index]
-      # re-order the quickmap so that the current hash value is the last
-      quickmap <<- c(quickmap[-index], quickmap[index])
-      return(unname(value))
+    # if value is NULL, call delete
+    if (is.null(value)) {
+      return(delete(state, ...))
     }
 
-    ## second, check if bitstr1 is in the memory.
-    ## if it is, then we can compute the hash value of bitstr2
-    ## easily by XOR-ing the offsets
-    flg <- as.character(str1) == names(quickmap)
-    if (any(flg)) {
-      index <- head(which(flg), 1)
-      value <- quickmap[index]
-      quickmap <<- c(quickmap[-index], quickmap[index])
-      ## value for str2
-      value <- Reduce(bitwXor, randomint[incr], value)
-      # add the new value to the quick map
-      quickmap <<- c(quickmap[-1], setNames(value, str2))
-      return(unname(value))
-    }
+    key <- if (is.null(convfunc)) state else convfunc(state, ...)
+    loc <- LocateKey(key, keysize, randomint, hashtable)
 
-    ## third, we will compute the hash value from scratch
-    value <- Reduce(bitwXor, randomint[c(key, incr)], 0L)
-    quickmap <<- c(quickmap[-1], setNames(value, str2))
-    return(unname(value))
-  }
-
-  hashfunc_vec <- function(keys)
-  {
-    ZobristHash_vec(keys, randomint)
-  }
-
-  ## define methods
-  ## - update(key, value)
-  ## - delete(key)
-  ## - find(key)
-  ## - get(key)
-  locate <- function(key, incr = integer(0))
-  {
-    # this function search for c(key, incr) in the hash table
-    # if if exists, returns a size 3 integer vector (i, j, k), such that
-    # hashtable[[i]][[j]] stores the key
-    # k equals 1 if and only if this key already exists
-    hv <- hashfunc(key, incr)
-    i <- hv + 1  # one-based index
-    str <- KeyToStr(c(key, incr), keysize)
-
-    ## do we have this key already?
-    flg <- str == names(hashtable[[i]])
-    if (any(flg)) {
-      ## there is one already
-      j <- head(which(flg), 1)
-      k <- 1L
-    } else {
-      j <- length(NULL) + 1L
-      k <- 0L
-    }
-    c(i, j, k)
-  }
-
-  update <- function(key, value, incr = integer(0))
-  {
-    index <- locate(key, incr)
-    str <- KeyToStr(c(key, incr), keysize)
-    if (index[[3]] == 1L) {
-      hashtable[[index[1]]][[index[2]]] <<- value
-    } else {
-      hashtable[[index[1]]] <<- c(hashtable[[index[1]]],
-                                  setNames(list(value), str))
-      ## increment numkey
+    # update the value, then update the name if this is newly added
+    hashtable[[ loc[1] ]][[ loc[2] ]] <<- value
+    if (loc[3] == 0) {
+      # new item, so give name and increment item count
+      names(hashtable[[ loc[1] ]])[ loc[2] ] <<- KeyToStr(key, keysize)
       numkey <<- numkey + 1L
-      if (rehashable) rehash()  ## rehash if needed
     }
+
+    if (rehashable) rehash()
     invisible(self)
   }
 
-  delete <- function(key, incr = integer(0))
+  delete <- function(state, ...)
   {
-    index <- locate(key, incr)
-    if (index[[3]] == 1L) {
-      hashtable[[index[1]]][[index[2]]] <<- NULL
-      ## decrement numkey
-      numkey <<- numkey - 1L
-    }
+    key <- if (is.null(convfunc)) state else convfunc(state, ...)
+    loc <- LocateKey(key, keysize, randomint, hashtable)
+
+    # do nothing if this item does not exists
+    if (loc[3] == 0) return(invisible(self))
+
+    hashtable[[ loc[1] ]][[ loc[2] ]] <<- NULL
+    numkey <<- numkey-1L
+
     invisible(self)
   }
 
-  find <- function(key, incr = integer(0))
+
+  haskey <- function(state, ...)
   {
-    locate(key, incr)[3] == 1L
+    key <- if (is.null(convfunc)) state else convfunc(state, ...)
+    FindKey(key, keysize, randomint, hashtable)
   }
 
-  get <- function(key, incr = integer(0))
+  getvalue <- function(state, ...)
   {
-    index <- locate(key, incr)
-    if (index[3] == 1L) {
-      return(hashtable[[index[1]]][[index[2]]])
-    } else {
-      return(NULL)
-    }
+    key <- if (is.null(convfunc)) state else convfunc(state, ...)
+    val <- GetValueByKey(key, keysize, randomint, hashtable)
+    # val is 1-length list if key exists, otherwise 0-length list
+    if (length(val) == 0) return(NULL)
+    unlist(val,recursive = FALSE)
   }
 
 
@@ -200,10 +127,8 @@ zobristht <- function(keysize, hashsize,
       keys <- StrsToKeys(names(tmp), keysize)
       hvs  <- ZobristHash_vec(keys, randomint)
 
-      #Map(update, keys, tmp)
       hashtable <<- MakeHashTable(length(hashtable), tmp, hvs)
       ## TODO: performance comparison?
-
     }
 
   }
@@ -211,42 +136,71 @@ zobristht <- function(keysize, hashsize,
   clone <- function()
   {
     # create a copy of, not a reference to, this object
-
-    out <- zobristht(keysize, hashsize, rehashable, threslf, memorysize)
-    out$hashtable <- self$hashtable
+    out <- zht(keysize, hashsize, convfunc, rehashable, threslf)
+    out$hashtable <- hashtable
     out
   }
 
+  size <- function() { numkey }
+
   self <- environment()
-  class(self) <- "zobristht"
+  class(self) <- c("zht")
   return(self)
 }
 
 
 
 
+## S3 generic functions
 
+#' Zobrist Hash Table Class
+#' @rdname zht-class
+#' @description Insert, get, find, and delete methods for Zobrist hash table
+#' @details to be added
+#' @name zht-class
+#' @param x object
+#' @param state state object
+#' @param value value to be inserted
+#' @param ... additional argument to be passed to state->key conversion
+#' @return
+#' \itemize{
+#'   \item{\code{`[<-`} and \code{`[`} returns reference to the object}
+#'   \item{\code{haskey} returns logical indicating the existing of the state}
+#' }
+#' @examples
+#' z <- zht(5, 4)
+#'
+#' z[1:3]
+#' z[1:3] <- 15
+#' haskey(z, 1:3)
+#' z[1:3] <- NULL  # deletion
+#' haskey(z, 1:3)
+
+
+#' @export
+#' @rdname zht-class
+`[<-.zht` <- function(x, state, ..., value)
+{
+  x$insert(state, value, ...)
+}
+
+#' @export
+#' @rdname zht-class
+`[.zht` <- function(x, state, ...)
+{
+  x$getvalue(state, ...)
+}
+
+#' @export
+#' @rdname zht-class
+haskey <- function(x, ...) { UseMethod("haskey") }
 
 
 
 #' @export
-`[.zobristht` <- function(obj, key, increment = numeric(0))
+haskey.zht <- function(x, state, ...)
 {
-  obj$get(key, increment)
+  x$haskey(state, ...)
 }
 
 
-# #' @export
-# `[<-.zobristht` <- function(obj, key, value, increment = numeric(0))
-# {
-#   obj$update(key, value, increment)
-# }
-#
-# #' @export
-# haskey <- function(obj, ...) { UseMethod("haskey") }
-#
-# #' @export
-# haskey.zobristht <- function(obj, key, increment, ...)
-# {
-#   obj$find(key, increment)
-# }

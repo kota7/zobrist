@@ -13,6 +13,7 @@ IntegerVector LocateKey(IntegerVector &key, int keysize,
   IntegerVector out(3);
   int hv = ZobristHash(key, randomint);
   std::string str = KeyToStr(key, keysize);
+  //Rcout << "hash value = " << hv << " str = " << str << "\n";
 
   if (hashtable[hv].size() == 0) {
     // no entry, this key should be the first entry
@@ -142,8 +143,10 @@ List GetValueByKey(IntegerVector &key, int keysize,
                    ListOf<List> &hashtable)
 {
   IntegerVector location = LocateKey(key, keysize, randomint, hashtable);
-  if (location[2] == 0) return NULL;
-  return hashtable[location[0]-1][location[1]-1];
+  List out;
+  if (location[2] == 0) return out;
+  out.push_back(hashtable[location[0]-1][location[1]-1]);
+  return out;
 }
 
 
@@ -191,8 +194,8 @@ LogicalVector FindKeys(ListOf<IntegerVector> &keys, int keysize,
 
 /*** R
 library(zobrist)
-z <- zobristht(5, 4)
-zobrist:::LocateKey(4, z$keysize, z$randomint, z$hashtable)
+z <- zht(5, 4)
+zobrist:::LocateKey(3, z$keysize, z$randomint, z$hashtable)
 zobrist:::LocateKeys(list(3, 4), z$keysize, z$randomint, z$hashtable)
 zobrist:::FindKey(3, z$keysize, z$randomint, z$hashtable)
 zobrist:::FindKeys(list(3, 4), z$keysize, z$randomint, z$hashtable)
