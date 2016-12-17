@@ -21,3 +21,4 @@ Suggests:
     combiter,
     testthat
 LinkingTo: Rcpp
+SystemRequirements: C++11

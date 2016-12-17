@@ -2,6 +2,7 @@
 #define HASHMETHODHEADERDEF
 
 #include <Rcpp.h>
+#include <unordered_map>
 #include "hashfunc.h"
 #include "keyStrConversion.h"
 
