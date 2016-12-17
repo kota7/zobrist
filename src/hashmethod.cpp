@@ -65,6 +65,9 @@ IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
   // record the hypothetical size of each hash value
   std::unordered_map<int, int> add_counter;
 
+  // record the outcomes for key, in case the same key appears again
+  std::unordered_map<std::string, IntegerVector> out_record;
+
   // initialization
   int n = keys.size();
   IntegerMatrix out(n, 3);
@@ -75,6 +78,14 @@ IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
     int hv = ZobristHash(key, randomint);
     std::string str = KeyToStr(key, keysize);
 
+    // check if this key has been already recorded
+    std::unordered_map<std::string, IntegerVector>::const_iterator key_appear =
+      out_record.find(str);
+    if (key_appear != out_record.end()) {
+      for (int j = 0; j < 3; j++) out(i,j) = key_appear->second[j];
+      continue;
+    }
+
     // how many items has been "added" so far to this hash value?
     std::unordered_map<int, int>::const_iterator getter = add_counter.find(hv);
     int ct_added = (getter == add_counter.end() ? 0 : getter->second);
@@ -84,10 +95,13 @@ IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
 
     if (hashtable[hv].size() == 0) {
       // no entry, this key should be added as the "next" item
+      ct_added++;
       out(i,0) = hv + 1;
-      out(i,1) = ct_added + 1;
+      out(i,1) = ct_added;
       out(i,2) = 0;  // not found indicator
-      add_counter.insert(std::pair<int, int>(hv, ct_added + 1));
+      add_counter.insert(std::pair<int, int>(hv, ct_added));
+      out_record.insert(std::pair<std::string, IntegerVector>(
+        str, IntegerVector::create(hv+1, ct_added, 0)));
       continue;
     }
 
@@ -101,15 +115,20 @@ IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
         out(i,0) = hv + 1;
         out(i,1) = j + 1;
         out(i,2) = 1;   // indicates found
+        out_record.insert(std::pair<std::string, IntegerVector>(
+            str, IntegerVector::create(hv+1, j+1, 1)));
         found = true;
       }
     }
 
     if (!found) {
+      ct_added++;
       out(i,0) = hv + 1;
-      out(i,1) = ct_added + 1; // not found -> append to last
+      out(i,1) = ct_added; // not found -> append to last
       out(i,2) = 0;  // not found
-      add_counter.insert(std::pair<int, int>(hv, ct_added + 1));
+      add_counter.insert(std::pair<int, int>(hv, ct_added));
+      out_record.insert(std::pair<std::string, IntegerVector>(
+          str, IntegerVector::create(hv+1, ct_added, 0)));
     }
   }
 
@@ -194,6 +213,7 @@ zobrist:::GetValueByKeys(list(4, 3), z$keysize, z$randomint, z$hashtable)
 z$update(c(4, 1), 10)
 zobrist:::LocateKey(c(4, 1), z$keysize, z$randomint, z$hashtable)
 zobrist:::LocateKeys(list(3, 4, c(4, 1)), z$keysize, z$randomint, z$hashtable)
+zobrist:::LocateKeys(list(4, 4), z$keysize, z$randomint, z$hashtable)
 zobrist:::GetValueByKey(c(4, 1), z$keysize, z$randomint, z$hashtable)
 zobrist:::GetValueByKeys(list(3, 4, c(4, 1, 4, 1, 1, 4)),
                          z$keysize, z$randomint, z$hashtable)
@@ -224,3 +244,4 @@ while (hasNext(iter))
       "\n")
 }
 */
+
