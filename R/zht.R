@@ -191,6 +191,8 @@ zht <- function(keysize,
   x$getvalue(state, ...)
 }
 
+
+
 #' @export
 #' @rdname zht-class
 haskey <- function(x, ...) { UseMethod("haskey") }
