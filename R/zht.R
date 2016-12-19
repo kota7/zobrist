@@ -194,7 +194,7 @@ zht <- function(keysize,
 #'   \item{\code{haskey} returns logical indicating the existing of the state}
 #' }
 #' @examples
-#' z <- zht(5, 4)
+#' z <- zht(5)
 #'
 #' z[1:3]
 #' z[1:3] <- 15
