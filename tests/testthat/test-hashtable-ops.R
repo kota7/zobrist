@@ -7,7 +7,7 @@ context("Hash table methods (update/find/delete/get)")
 
 
 test_that("update and get", {
-  z <- zht(5, 4)
+  z <- zht(5, hashsize = 4)
   expect_null(z[3])
 
   z[3] <- 2
@@ -21,7 +21,7 @@ test_that("update and get", {
   z[5] <- list(x = 5, y = "abc")
   expect_equal(z[5], list(x = 5, y = "abc"))
 
-  z <- zht(5, 4)
+  z <- zht(5, hashsize = 4)
   iter <- isubset(5)
   ct <- 0L
   while (hasNext(iter))
@@ -38,7 +38,7 @@ test_that("update and get", {
 
 
 test_that("delete and find", {
-  z <- zht(5, 3)
+  z <- zht(5, hashsize = 3)
 
   iter <- isubset(5)
   while (hasNext(iter))

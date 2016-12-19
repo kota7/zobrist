@@ -53,3 +53,7 @@ MakeHashTable <- function(htsize, values, index) {
     .Call('zobrist_MakeHashTable', PACKAGE = 'zobrist', htsize, values, index)
 }
 
+RemakeHashTable <- function(oldtable, htsize, keysize, randomint) {
+    .Call('zobrist_RemakeHashTable', PACKAGE = 'zobrist', oldtable, htsize, keysize, randomint)
+}
+

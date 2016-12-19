@@ -1,10 +1,10 @@
 #' Create a Zobrist Hash Table
 #' @param keysize Positive integer. Bit size of keys
-#' @param hashsize Positive integer. Bit size of hash values
 #' @param convfunc Function that converts state into key.
 #' If not specified, it is assumed that the state is identical to key.
 #' If specified, the function must take \code{state} as the first entry,
 #' and keyword arguments \code{...}.  See details.
+#' @param hashsize Positive integer. Bit size of hash values
 #' @param rehashable Logical. \code{TRUE} if
 #' hashsize should be increased dynamically
 #' @param threslf Numeric. When \code{rehash = TRUE},
@@ -13,7 +13,7 @@
 #' @details to be added
 #' @export
 zht <- function(keysize,
-                hashsize = 10, convfunc = NULL,
+                convfunc = NULL, hashsize = 10,
                 rehashable = FALSE, threslf = 0.9)
 {
   ## input validation
@@ -50,6 +50,24 @@ zht <- function(keysize,
 
 
   ## hash operators
+  locate <- function(state, ...)
+  {
+    key <- if (is.null(convfunc)) state else convfunc(state, ...)
+    hv <- ZobristHash(key, randomint)
+    str = KeyToStr(key, keysize)
+    return(LocateKey(key, keysize, randomint, hashtable))
+
+    flg <- (str == names(hashtable[[hv+1]]))
+    if (any(flg)) {
+      # found
+      return(c(hv + 1L, which(flg), 1L))
+    }
+
+    # no entry -> appended to the last
+    return(c(hv + 1L, length(hashtable[[hv+1]]) + 1L, 0L))
+  }
+
+
   insert <- function(state, value, ...)
   {
     # if value is NULL, call delete
@@ -58,7 +76,8 @@ zht <- function(keysize,
     }
 
     key <- if (is.null(convfunc)) state else convfunc(state, ...)
-    loc <- LocateKey(key, keysize, randomint, hashtable)
+    #loc <- LocateKey(key, keysize, randomint, hashtable)
+    loc <- locate(state, ...)
 
     # update the value, then update the name if this is newly added
     hashtable[[ loc[1] ]][[ loc[2] ]] <<- value
@@ -75,7 +94,8 @@ zht <- function(keysize,
   delete <- function(state, ...)
   {
     key <- if (is.null(convfunc)) state else convfunc(state, ...)
-    loc <- LocateKey(key, keysize, randomint, hashtable)
+    #loc <- LocateKey(key, keysize, randomint, hashtable)
+    loc <- locate(state, ...)
 
     # do nothing if this item does not exists
     if (loc[3] == 0) return(invisible(self))
@@ -90,16 +110,20 @@ zht <- function(keysize,
   haskey <- function(state, ...)
   {
     key <- if (is.null(convfunc)) state else convfunc(state, ...)
-    FindKey(key, keysize, randomint, hashtable)
+    #FindKey(key, keysize, randomint, hashtable)
+    (locate(state, ...)[3] > 0)
   }
 
   getvalue <- function(state, ...)
   {
     key <- if (is.null(convfunc)) state else convfunc(state, ...)
+    loc <- locate(state, ...)
+    if (loc[3] == 0L) return(NULL)
     val <- GetValueByKey(key, keysize, randomint, hashtable)
+    hashtable[[loc[1]]][[loc[2]]]
     # val is 1-length list if key exists, otherwise 0-length list
-    if (length(val) == 0) return(NULL)
-    unlist(val,recursive = FALSE)
+    #if (length(val) == 0) return(NULL)
+    #unlist(val,recursive = FALSE)
   }
 
 
@@ -114,7 +138,8 @@ zht <- function(keysize,
 
     lf <- numkey / 2^hashsize
     if (lf > threslf) {
-      tmp <- hashtable  ## make a copy of old table
+      oldtable <- hashtable  ## make a copy of old table
+
 
       ## set new hash bit size
       hashsize <<- ceiling(log2(numkey/threslf))
@@ -123,12 +148,12 @@ zht <- function(keysize,
       initialize()
 
       ## copy old entries one by one
-      tmp <- unlist(tmp, recursive = FALSE)
+      tmp <- unlist(oldtable, recursive = FALSE)
       keys <- StrsToKeys(names(tmp), keysize)
       hvs  <- ZobristHash_vec(keys, randomint)
-
       hashtable <<- MakeHashTable(length(hashtable), tmp, hvs)
-      ## TODO: performance comparison?
+
+      #hashtable <<- RemakeHashTable(oldtable, length(hashtable), keysize, randomint)
     }
 
   }
@@ -136,7 +161,8 @@ zht <- function(keysize,
   clone <- function()
   {
     # create a copy of, not a reference to, this object
-    out <- zht(keysize, hashsize, convfunc, rehashable, threslf)
+    out <- zht(keysize = keysize, convfunc = convfunc, hashsize = hashsize,
+               rehashable = rehashable, threslf = threslf)
     out$hashtable <- hashtable
     out
   }

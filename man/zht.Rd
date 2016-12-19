@@ -4,18 +4,18 @@
 \alias{zht}
 \title{Create a Zobrist Hash Table}
 \usage{
-zht(keysize, hashsize = 10, convfunc = NULL, rehashable = FALSE,
+zht(keysize, convfunc = NULL, hashsize = 10, rehashable = FALSE,
   threslf = 0.9)
 }
 \arguments{
 \item{keysize}{Positive integer. Bit size of keys}
 
-\item{hashsize}{Positive integer. Bit size of hash values}
-
 \item{convfunc}{Function that converts state into key.
 If not specified, it is assumed that the state is identical to key.
 If specified, the function must take \code{state} as the first entry,
 and keyword arguments \code{...}.  See details.}
+
+\item{hashsize}{Positive integer. Bit size of hash values}
 
 \item{rehashable}{Logical. \code{TRUE} if
 hashsize should be increased dynamically}

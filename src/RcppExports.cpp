@@ -30,7 +30,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // LocateKey
-IntegerVector LocateKey(IntegerVector& key, int keysize, std::vector<unsigned int>& randomint, ListOf<List>& hashtable);
+IntegerVector LocateKey(IntegerVector& key, int keysize, std::vector<unsigned int>& randomint, List& hashtable);
 RcppExport SEXP zobrist_LocateKey(SEXP keySEXP, SEXP keysizeSEXP, SEXP randomintSEXP, SEXP hashtableSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -38,13 +38,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector& >::type key(keySEXP);
     Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
     Rcpp::traits::input_parameter< std::vector<unsigned int>& >::type randomint(randomintSEXP);
-    Rcpp::traits::input_parameter< ListOf<List>& >::type hashtable(hashtableSEXP);
+    Rcpp::traits::input_parameter< List& >::type hashtable(hashtableSEXP);
     rcpp_result_gen = Rcpp::wrap(LocateKey(key, keysize, randomint, hashtable));
     return rcpp_result_gen;
 END_RCPP
 }
 // LocateKeys
-IntegerMatrix LocateKeys(ListOf<IntegerVector>& keys, int keysize, std::vector<unsigned int>& randomint, ListOf<List>& hashtable);
+IntegerMatrix LocateKeys(ListOf<IntegerVector>& keys, int keysize, std::vector<unsigned int>& randomint, List& hashtable);
 RcppExport SEXP zobrist_LocateKeys(SEXP keysSEXP, SEXP keysizeSEXP, SEXP randomintSEXP, SEXP hashtableSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -52,13 +52,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< ListOf<IntegerVector>& >::type keys(keysSEXP);
     Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
     Rcpp::traits::input_parameter< std::vector<unsigned int>& >::type randomint(randomintSEXP);
-    Rcpp::traits::input_parameter< ListOf<List>& >::type hashtable(hashtableSEXP);
+    Rcpp::traits::input_parameter< List& >::type hashtable(hashtableSEXP);
     rcpp_result_gen = Rcpp::wrap(LocateKeys(keys, keysize, randomint, hashtable));
     return rcpp_result_gen;
 END_RCPP
 }
 // GetValueByKey
-List GetValueByKey(IntegerVector& key, int keysize, std::vector<unsigned int>& randomint, ListOf<List>& hashtable);
+List GetValueByKey(IntegerVector& key, int keysize, std::vector<unsigned int>& randomint, List& hashtable);
 RcppExport SEXP zobrist_GetValueByKey(SEXP keySEXP, SEXP keysizeSEXP, SEXP randomintSEXP, SEXP hashtableSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -66,13 +66,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector& >::type key(keySEXP);
     Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
     Rcpp::traits::input_parameter< std::vector<unsigned int>& >::type randomint(randomintSEXP);
-    Rcpp::traits::input_parameter< ListOf<List>& >::type hashtable(hashtableSEXP);
+    Rcpp::traits::input_parameter< List& >::type hashtable(hashtableSEXP);
     rcpp_result_gen = Rcpp::wrap(GetValueByKey(key, keysize, randomint, hashtable));
     return rcpp_result_gen;
 END_RCPP
 }
 // GetValueByKeys
-List GetValueByKeys(ListOf<IntegerVector>& keys, int keysize, std::vector<unsigned int>& randomint, ListOf<List>& hashtable);
+List GetValueByKeys(ListOf<IntegerVector>& keys, int keysize, std::vector<unsigned int>& randomint, List& hashtable);
 RcppExport SEXP zobrist_GetValueByKeys(SEXP keysSEXP, SEXP keysizeSEXP, SEXP randomintSEXP, SEXP hashtableSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -80,13 +80,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< ListOf<IntegerVector>& >::type keys(keysSEXP);
     Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
     Rcpp::traits::input_parameter< std::vector<unsigned int>& >::type randomint(randomintSEXP);
-    Rcpp::traits::input_parameter< ListOf<List>& >::type hashtable(hashtableSEXP);
+    Rcpp::traits::input_parameter< List& >::type hashtable(hashtableSEXP);
     rcpp_result_gen = Rcpp::wrap(GetValueByKeys(keys, keysize, randomint, hashtable));
     return rcpp_result_gen;
 END_RCPP
 }
 // FindKey
-bool FindKey(IntegerVector& key, int keysize, std::vector<unsigned int>& randomint, ListOf<List>& hashtable);
+bool FindKey(IntegerVector& key, int keysize, std::vector<unsigned int>& randomint, List& hashtable);
 RcppExport SEXP zobrist_FindKey(SEXP keySEXP, SEXP keysizeSEXP, SEXP randomintSEXP, SEXP hashtableSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -94,13 +94,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector& >::type key(keySEXP);
     Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
     Rcpp::traits::input_parameter< std::vector<unsigned int>& >::type randomint(randomintSEXP);
-    Rcpp::traits::input_parameter< ListOf<List>& >::type hashtable(hashtableSEXP);
+    Rcpp::traits::input_parameter< List& >::type hashtable(hashtableSEXP);
     rcpp_result_gen = Rcpp::wrap(FindKey(key, keysize, randomint, hashtable));
     return rcpp_result_gen;
 END_RCPP
 }
 // FindKeys
-LogicalVector FindKeys(ListOf<IntegerVector>& keys, int keysize, std::vector<unsigned int>& randomint, ListOf<List>& hashtable);
+LogicalVector FindKeys(ListOf<IntegerVector>& keys, int keysize, std::vector<unsigned int>& randomint, List& hashtable);
 RcppExport SEXP zobrist_FindKeys(SEXP keysSEXP, SEXP keysizeSEXP, SEXP randomintSEXP, SEXP hashtableSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -108,7 +108,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< ListOf<IntegerVector>& >::type keys(keysSEXP);
     Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
     Rcpp::traits::input_parameter< std::vector<unsigned int>& >::type randomint(randomintSEXP);
-    Rcpp::traits::input_parameter< ListOf<List>& >::type hashtable(hashtableSEXP);
+    Rcpp::traits::input_parameter< List& >::type hashtable(hashtableSEXP);
     rcpp_result_gen = Rcpp::wrap(FindKeys(keys, keysize, randomint, hashtable));
     return rcpp_result_gen;
 END_RCPP
@@ -171,6 +171,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type values(valuesSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type index(indexSEXP);
     rcpp_result_gen = Rcpp::wrap(MakeHashTable(htsize, values, index));
+    return rcpp_result_gen;
+END_RCPP
+}
+// RemakeHashTable
+List RemakeHashTable(List& oldtable, int htsize, int keysize, std::vector<unsigned int>& randomint);
+RcppExport SEXP zobrist_RemakeHashTable(SEXP oldtableSEXP, SEXP htsizeSEXP, SEXP keysizeSEXP, SEXP randomintSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List& >::type oldtable(oldtableSEXP);
+    Rcpp::traits::input_parameter< int >::type htsize(htsizeSEXP);
+    Rcpp::traits::input_parameter< int >::type keysize(keysizeSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned int>& >::type randomint(randomintSEXP);
+    rcpp_result_gen = Rcpp::wrap(RemakeHashTable(oldtable, htsize, keysize, randomint));
     return rcpp_result_gen;
 END_RCPP
 }

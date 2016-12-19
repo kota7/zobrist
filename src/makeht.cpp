@@ -1,4 +1,7 @@
 #include <Rcpp.h>
+#include <string>
+#include "hashfunc.h"
+#include "keyStrConversion.h"
 using namespace Rcpp;
 
 // [[Rcpp::export]]
@@ -40,6 +43,40 @@ List MakeHashTable(int htsize,
 
   return out;
 }
+
+
+// [[Rcpp::export]]
+List RemakeHashTable(List &oldtable, int htsize,
+                     int keysize, std::vector<unsigned int> &randomint)
+{
+  std::vector<List> tmp(htsize);
+  std::vector<CharacterVector> tmp_names(htsize);
+
+  for (int i = 0; i < oldtable.size(); i++)
+  {
+    List cur_list = oldtable[i];
+    if (cur_list.size() == 0) continue;
+
+    CharacterVector names = cur_list.names();
+    for (int j = 0; j < cur_list.size(); j++)
+    {
+      IntegerVector key = StrToKey(as<std::string>(names[j]), keysize);
+      int hv = ZobristHash(key, randomint);
+      tmp[hv].push_back(cur_list[j]);
+      tmp_names[hv].push_back(names[j]);
+    }
+  }
+
+  // compile the output
+  List out;
+  for (size_t i = 0; i < tmp.size(); i++)
+  {
+    tmp[i].names() = tmp_names[i];
+    out.push_back(tmp[i]);
+  }
+  return out;
+}
+
 
 /*** R
 */

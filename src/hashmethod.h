@@ -12,36 +12,36 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 IntegerVector LocateKey(IntegerVector &key, int keysize,
                         std::vector<unsigned int> &randomint,
-                        ListOf<List> &hashtable);
+                        List &hashtable);
 
 
 // [[Rcpp::export]]
 IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
                          int keysize,
                          std::vector<unsigned int> &randomint,
-                         ListOf<List> &hashtable);
+                         List &hashtable);
 
 
 // [[Rcpp::export]]
 List GetValueByKey(IntegerVector &key, int keysize,
                    std::vector<unsigned int> &randomint,
-                   ListOf<List> &hashtable);
+                   List &hashtable);
 
 
 // [[Rcpp::export]]
 List GetValueByKeys(ListOf<IntegerVector> &keys,
                     int keysize,
                     std::vector<unsigned int> &randomint,
-                    ListOf<List> &hashtable);
+                    List &hashtable);
 
 // [[Rcpp::export]]
 bool FindKey(IntegerVector &key, int keysize,
              std::vector<unsigned int> &randomint,
-             ListOf<List> &hashtable);
+             List &hashtable);
 
 // [[Rcpp::export]]
 LogicalVector FindKeys(ListOf<IntegerVector> &keys, int keysize,
                        std::vector<unsigned int> &randomint,
-                       ListOf<List> &hashtable);
+                       List &hashtable);
 
 #endif

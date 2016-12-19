@@ -6,7 +6,7 @@ library(combiter)
 context("Rehash")
 
 test_that("Rehash", {
-  z <- zht(5, 1, rehashable = TRUE, threslf = 0.5)
+  z <- zht(5, hashsize = 1, rehashable = TRUE, threslf = 0.1)
   ## this will accept upto 2^3 / 2 = 4 keys stored
   ## when we have 4 or more items, rehash is invoked
   iter <- isubset(5)

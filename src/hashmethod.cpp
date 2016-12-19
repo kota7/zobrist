@@ -8,14 +8,16 @@ using namespace Rcpp;
 
 IntegerVector LocateKey(IntegerVector &key, int keysize,
                         std::vector<unsigned int> &randomint,
-                        ListOf<List> &hashtable)
+                        List &hashtable)
 {
   IntegerVector out(3);
   int hv = ZobristHash(key, randomint);
   std::string str = KeyToStr(key, keysize);
   //Rcout << "hash value = " << hv << " str = " << str << "\n";
 
-  if (hashtable[hv].size() == 0) {
+  List cur_list = hashtable[hv];
+
+  if (cur_list.size() == 0) {
     // no entry, this key should be the first entry
     out[0] = hv + 1;
     out[1] = 1;
@@ -23,8 +25,8 @@ IntegerVector LocateKey(IntegerVector &key, int keysize,
     return out;
   }
 
-  CharacterVector names = hashtable[hv].names();
-  for (int i = 0; i < hashtable[hv].size(); i++)
+  CharacterVector names = cur_list.names();
+  for (int i = 0; i < cur_list.size(); i++)
   {
     if (as<std::string>(names[i]) == str) {
       // return one-based index
@@ -36,7 +38,7 @@ IntegerVector LocateKey(IntegerVector &key, int keysize,
   }
   // not found
   out[0] = hv + 1;
-  out[1] = hashtable[hv].size() + 1; // not found -> append to last
+  out[1] = cur_list.size() + 1; // not found -> append to last
   out[2] = 0;  // not found
 
   return out;
@@ -46,7 +48,7 @@ IntegerVector LocateKey(IntegerVector &key, int keysize,
 IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
                          int keysize,
                          std::vector<unsigned int> &randomint,
-                         ListOf<List> &hashtable)
+                         List &hashtable)
 {
   // locate keys in hashtable
   //
@@ -78,6 +80,7 @@ IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
     IntegerVector key = keys[i];
     int hv = ZobristHash(key, randomint);
     std::string str = KeyToStr(key, keysize);
+    List cur_list = hashtable[hv];
 
     // check if this key has been already recorded
     std::unordered_map<std::string, IntegerVector>::const_iterator key_appear =
@@ -91,14 +94,12 @@ IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
     std::unordered_map<int, int>::const_iterator getter = add_counter.find(hv);
     int ct_added = (getter == add_counter.end() ? 0 : getter->second);
 
-    // hypothetical current size
-    int hypo_size = hashtable[hv].size() + ct_added;
 
-    if (hashtable[hv].size() == 0) {
+    if (cur_list.size() == 0) {
       // no entry, this key should be added as the "next" item
       ct_added++;
       out(i,0) = hv + 1;
-      out(i,1) = ct_added;
+      out(i,1) = cur_list.size() + ct_added;
       out(i,2) = 0;  // not found indicator
       add_counter.insert(std::pair<int, int>(hv, ct_added));
       out_record.insert(std::pair<std::string, IntegerVector>(
@@ -107,9 +108,9 @@ IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
     }
 
     // there is entry, so check the name match
-    CharacterVector names = hashtable[hv].names();
+    CharacterVector names = cur_list.names();
     bool found = false;
-    for (int j = 0; j < hashtable[hv].size(); j++)
+    for (int j = 0; j < cur_list.size(); j++)
     {
       if (as<std::string>(names[j]) == str) {
         // return one-based index
@@ -140,12 +141,13 @@ IntegerMatrix LocateKeys(ListOf<IntegerVector> &keys,
 
 List GetValueByKey(IntegerVector &key, int keysize,
                    std::vector<unsigned int> &randomint,
-                   ListOf<List> &hashtable)
+                   List &hashtable)
 {
   IntegerVector location = LocateKey(key, keysize, randomint, hashtable);
   List out;
   if (location[2] == 0) return out;
-  out.push_back(hashtable[location[0]-1][location[1]-1]);
+  List cur_list = hashtable[location[0]-1];
+  out.push_back(cur_list[location[1]-1]);
   return out;
 }
 
@@ -153,7 +155,7 @@ List GetValueByKey(IntegerVector &key, int keysize,
 List GetValueByKeys(ListOf<IntegerVector> &keys,
                     int keysize,
                     std::vector<unsigned int> &randomint,
-                    ListOf<List> &hashtable)
+                    List &hashtable)
 {
   IntegerMatrix locations = LocateKeys(keys, keysize, randomint, hashtable);
   List out;
@@ -163,7 +165,8 @@ List GetValueByKeys(ListOf<IntegerVector> &keys,
       List tmp;
       out.push_back(tmp);
     } else {
-      out.push_back(hashtable[locations(i,0)-1][locations(i,1)-1]);
+      List cur_list = hashtable[locations(i,0)-1];
+      out.push_back(cur_list[locations(i,1)-1]);
     }
   }
   return out;
@@ -173,14 +176,14 @@ List GetValueByKeys(ListOf<IntegerVector> &keys,
 
 bool FindKey(IntegerVector &key, int keysize,
              std::vector<unsigned int> &randomint,
-             ListOf<List> &hashtable)
+             List &hashtable)
 {
   return (LocateKey(key, keysize, randomint, hashtable)[2] == 1);
 }
 
 LogicalVector FindKeys(ListOf<IntegerVector> &keys, int keysize,
                        std::vector<unsigned int> &randomint,
-                       ListOf<List> &hashtable)
+                       List &hashtable)
 {
   int n = keys.size();
   LogicalVector out(n);
@@ -194,13 +197,13 @@ LogicalVector FindKeys(ListOf<IntegerVector> &keys, int keysize,
 
 /*** R
 library(zobrist)
-z <- zht(5, 4)
+z <- zht(5, hashsize = 4)
 zobrist:::LocateKey(3, z$keysize, z$randomint, z$hashtable)
 zobrist:::LocateKeys(list(3, 4), z$keysize, z$randomint, z$hashtable)
 zobrist:::FindKey(3, z$keysize, z$randomint, z$hashtable)
 zobrist:::FindKeys(list(3, 4), z$keysize, z$randomint, z$hashtable)
 
-z$update(3, 2)
+z[3] <- 2
 
 zobrist:::LocateKeys(list(3, 4), z$keysize, z$randomint, z$hashtable)
 zobrist:::LocateKeys(list(4, 3), z$keysize, z$randomint, z$hashtable)
@@ -213,7 +216,7 @@ zobrist:::GetValueByKey(3, z$keysize, z$randomint, z$hashtable)
 
 zobrist:::GetValueByKeys(list(4, 3), z$keysize, z$randomint, z$hashtable)
 
-z$update(c(4, 1), 10)
+z[c(4, 1)] <- 10
 zobrist:::LocateKey(c(4, 1), z$keysize, z$randomint, z$hashtable)
 zobrist:::LocateKeys(list(3, 4, c(4, 1)), z$keysize, z$randomint, z$hashtable)
 zobrist:::LocateKeys(list(4, 4), z$keysize, z$randomint, z$hashtable)
@@ -227,14 +230,14 @@ zobrist:::FindKeys(list(3, 4, c(4, 4, 1, 4), c(3, 3, 3), c(3, 3, 4)),
                    z$keysize, z$randomint, z$hashtable)
 
 library(combiter)
-z <- zobristht(5, 2, rehashable = FALSE, threslf = 0.5)
+z <- zht(5, rehashable = FALSE, threslf = 0.5)
 ## this will accept upto 2^3 / 2 = 4 keys stored
 ## when we have 4 or more items, rehash is invoked
 iter <- isubset(5)
 while (hasNext(iter))
 {
   i <- nextElem(iter)
-  z$update(i, sum(i))
+  z[i] <- sum(i)
 }
 
 ## check if the values are still correctly stored
@@ -242,7 +245,7 @@ iter <- isubset(5)
 while (hasNext(iter))
 {
   i <- nextElem(iter)
-  cat(z$get(i), sum(i),
+  cat(z[i], sum(i),
       zobrist:::GetValueByKey(i, z$keysize, z$randomint, z$hashtable)[[1]],
       "\n")
 }
